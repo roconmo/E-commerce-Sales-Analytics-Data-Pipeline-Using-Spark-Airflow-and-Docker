@@ -1,0 +1,108 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python virtual environments
+env/
+venv/
+ENV/
+VENV/
+
+# Airflow related files
+airflow/airflow.db
+airflow/unittests.db
+airflow/.coverage
+airflow/airflow.cfg
+logs/
+airflow/logs/
+airflow/dags/__pycache__/
+
+# PyCharm project files
+.idea/
+*.iml
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# VS Code
+.vscode/
+.history/
+
+# Docker related files
+*.pid
+*.log
+docker-compose.override.yml
+docker-compose.yaml.backup
+**/node_modules/
+**/coverage/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# System-specific files
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+
+# Git specific files
+*.rej
+*.patch
+
+# CSV or other data files (Optional)
+*.csv
+*.tsv
+data/
+*.dat
+
+# Configuration files (Sensitive information)
+*.env
+.env.*
+.envrc
+*.secret
+secret/
+
+# Miscellaneous
+*.~lock.*
+*.bak
+*.swp
+*.swo
+*.tmp
+*~
+*.log
+*.crt
+*.key
+run_with_cleanup.sh
+
+# Cache
+__MACOSX/
+*.cache
+*.tmp
+*.log
+
+# Airflow Docker volumes
+airflow/dags/data/
+docker/volumes/
+
+# Spark related
+spark-warehouse/
+.derby/
+spark-logs/
+spark-events/
+
+# Exclude specific images and other binary files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# IntelliJ IDEA settings
+.idea/
+
+# Node modules
+node_modules/
+

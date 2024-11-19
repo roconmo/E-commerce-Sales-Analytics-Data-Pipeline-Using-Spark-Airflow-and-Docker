@@ -1,0 +1,14 @@
+# Use the official Apache Airflow image as a base
+FROM apache/airflow:2.5.0
+
+# Set environment variables to avoid any interactive prompts
+ENV AIRFLOW_HOME=/opt/airflow
+
+# Install additional dependencies if needed
+# For example, if you need specific Python packages for Spark interaction or other processing
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the DAGs to the Airflow DAGs folder
+COPY dags/ /opt/airflow/dags/
