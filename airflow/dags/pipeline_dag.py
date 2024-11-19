@@ -2,6 +2,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 import pandas as pd
+import logging
 
 default_args = {
     'owner': 'airflow',
@@ -10,50 +11,69 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-# Path to the CSV file
-csv_path = '/opt/airflow/dags/data/your_data.csv'
+# Setup Logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Paths to files
+csv_path = '/opt/airflow/dags/data/ecommerce_sales.csv'
+extracted_path = '/opt/airflow/dags/data/extracted_data.pkl'
+transformed_path = '/opt/airflow/dags/data/transformed_data.pkl'
+loaded_path = '/opt/airflow/dags/data/loaded_data.csv'
+
 
 # Extract Function
 def extract_data():
-    df = pd.read_csv(csv_path)
-    df.to_pickle('/opt/airflow/dags/data/extracted_data.pkl')  # Save the extracted data for next steps
+    try:
+        df = pd.read_csv(csv_path)
+        df.to_pickle(extracted_path)
+        logger.info("Extracted data successfully saved.")
+    except Exception as e:
+        logger.error(f"Error occurred during data extraction: {e}")
+
 
 # Transform Function
 def transform_data():
-    df = pd.read_pickle('/opt/airflow/dags/data/extracted_data.pkl')
+    try:
+        df = pd.read_pickle(extracted_path)
 
-    # Example Transformations:
-    # 1. Handling missing data
-    df.fillna({'quantity': 1, 'price_per_unit': 0}, inplace=True)
+        # Handling missing data
+        df.fillna({'quantity': 1, 'price_per_unit': 0}, inplace=True)
 
-    # 2. Adding new columns
-    df['order_date'] = pd.to_datetime(df['order_date'])
-    df['year'] = df['order_date'].dt.year
-    df['month'] = df['order_date'].dt.month
+        # Adding new columns
+        df['order_date'] = pd.to_datetime(df['order_date'])
+        df['year'] = df['order_date'].dt.year
+        df['month'] = df['order_date'].dt.month
 
-    # 3. Extracting state from shipping address
-    df['state'] = df['shipping_address'].apply(lambda x: x.split(',')[-1].strip().split(' ')[0])
+        # Extracting state from shipping address
+        df['state'] = df['shipping_address'].apply(lambda x: x.split(',')[-1].strip().split(' ')[0])
 
-    # 4. Normalizing product categories
-    df['category'] = df['category'].str.lower()
+        # Normalizing product categories
+        df['category'] = df['category'].str.lower()
 
-    df.to_pickle('/opt/airflow/dags/data/transformed_data.pkl')  # Save the transformed data
+        df.to_pickle(transformed_path)
+        logger.info("Transformed data successfully saved.")
+    except Exception as e:
+        logger.error(f"Error occurred during data transformation: {e}")
+
 
 # Load Function
 def load_data():
-    df = pd.read_pickle('/opt/airflow/dags/data/transformed_data.pkl')
+    try:
+        df = pd.read_pickle(transformed_path)
+        df.to_csv(loaded_path, index=False)
+        logger.info("Loaded data successfully saved.")
+    except Exception as e:
+        logger.error(f"Error occurred during data loading: {e}")
 
-    # Example Load: Save the transformed data to a new CSV file
-    df.to_csv('/opt/airflow/dags/data/loaded_data.csv', index=False)
 
 # Define DAG
 with DAG(
-    'ecommerce_etl_pipeline',
-    default_args=default_args,
-    schedule_interval='@daily',
-    catchup=False,
+        'ecommerce_etl_pipeline',
+        default_args=default_args,
+        schedule_interval='@daily',
+        catchup=False,
 ) as dag:
-
     # Task 1: Extract data
     extract_task = PythonOperator(
         task_id='extract_data',
