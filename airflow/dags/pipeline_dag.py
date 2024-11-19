@@ -3,6 +3,7 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 import pandas as pd
 import logging
+import subprocess
 
 default_args = {
     'owner': 'airflow',
@@ -16,10 +17,34 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Paths to files
-csv_path = '/opt/airflow/dags/data/ecommerce_sales.csv'
+csv_path = '/opt/airflow/dags/data/ecommerce_sales_data.csv'
 extracted_path = '/opt/airflow/dags/data/extracted_data.pkl'
 transformed_path = '/opt/airflow/dags/data/transformed_data.pkl'
 loaded_path = '/opt/airflow/dags/data/loaded_data.csv'
+
+###################################
+
+
+
+def copy_file_from_container(container_name, container_path, local_path):
+    try:
+        # Construct the docker cp command
+        command = ["docker", "cp", f"{container_name}:{container_path}", local_path]
+        # Run the command using subprocess
+        subprocess.run(command, check=True)
+        print(f"Successfully copied {container_path} from {container_name} to {local_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred while copying file: {e}")
+
+# Parameters
+container_name = "airflow-webserver"  # Replace with your container name or ID
+container_path = "/opt/airflow/dags/data/loaded_data.csv"  # The path inside the container
+local_path = "./loaded_data.csv"  # The path on your local machine
+
+# Execute the function
+copy_file_from_container(container_name, container_path, local_path)
+
+###################################
 
 
 # Extract Function
